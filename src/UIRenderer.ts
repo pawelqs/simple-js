@@ -29,12 +29,6 @@ export class UIRenderer {
         return loading;
     }
 
-    showSuccess(container: HTMLElement, message = 'Code executed successfully'): void {
-        const successDiv = container.createDiv('simplejs-success');
-        successDiv.textContent = `✅ ${message}`;
-        successDiv.style.color = 'var(--text-success)';
-        successDiv.style.padding = '8px';
-    }
 
     showError(container: HTMLElement, message: string): void {
         const errorDiv = container.createDiv('simplejs-error');
@@ -138,16 +132,34 @@ export class UIRenderer {
         consoleDiv.createSpan({ text: message });
     }
 
-    addControlBar(container: HTMLElement, onRerun: () => void): void {
+    addControlBar(container: HTMLElement, onRerun: () => void, options: ControlBarOptions = {}): void {
         const controls = container.createDiv('simplejs-controls');
         controls.style.background = 'var(--background-secondary)';
         controls.style.padding = '8px';
         controls.style.borderTop = '1px solid var(--background-modifier-border)';
         controls.style.display = 'flex';
-        controls.style.justifyContent = 'flex-end';
+        controls.style.justifyContent = 'space-between';
+        controls.style.alignItems = 'center';
         controls.style.gap = '8px';
         
-        const rerunBtn = controls.createEl('button', { text: '↻ Re-run' });
+        // Left side - Status message
+        const statusArea = controls.createDiv('simplejs-status');
+        if (options.showSuccess) {
+            const successMsg = statusArea.createSpan({
+                text: '✅ Code executed successfully',
+                cls: 'simplejs-success-msg'
+            });
+            successMsg.style.color = 'var(--text-success)';
+            successMsg.style.fontSize = '0.85em';
+            successMsg.style.fontWeight = '500';
+        }
+        
+        // Right side - Controls
+        const controlsArea = controls.createDiv('simplejs-controls-right');
+        controlsArea.style.display = 'flex';
+        controlsArea.style.gap = '8px';
+        
+        const rerunBtn = controlsArea.createEl('button', { text: '↻ Re-run' });
         rerunBtn.style.padding = '4px 8px';
         rerunBtn.style.fontSize = '0.8em';
         rerunBtn.style.background = 'var(--interactive-normal)';
@@ -176,4 +188,8 @@ export class OutputContainer {
 export interface TableOptions {
     columns?: string[];
     pageSize?: number;
+}
+
+export interface ControlBarOptions {
+    showSuccess?: boolean;
 }

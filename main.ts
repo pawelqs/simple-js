@@ -2,7 +2,7 @@ import { Plugin, Notice } from 'obsidian';
 import { SimpleJSSettings, DEFAULT_SETTINGS, SimpleJSSettingTab } from './src/simple-settings';
 import { DataReader } from './src/DataReader';
 import { PlotlyManager } from './src/PlotlyManager';
-import { UIRenderer } from './src/UIRenderer';
+import { UIRenderer, ControlBarOptions } from './src/UIRenderer';
 import { CodeExecutor } from './src/CodeExecutor';
 import { ExecutionContextProvider } from './src/ExecutionContextProvider';
 
@@ -93,6 +93,8 @@ export default class SimpleJSPlugin extends Plugin {
         // Show loading
         const loading = this.uiRenderer.showLoading(outputContainer.content);
 
+        let showSuccess = false;
+        
         try {
             // Optional: Validate code before execution
             const validation = this.codeExecutor.validateCode(source);
@@ -112,20 +114,23 @@ export default class SimpleJSPlugin extends Plugin {
             // Remove loading indicator
             loading.remove();
             
-            // Show success if no output was generated
-            if (outputContainer.content.children.length === 0) {
-                this.uiRenderer.showSuccess(outputContainer.content);
-            }
+            // Determine if success message should be shown (no output generated)
+            showSuccess = outputContainer.content.children.length === 0;
             
         } catch (error: any) {
             loading.remove();
             this.uiRenderer.showError(outputContainer.content, error.message);
+            showSuccess = false; // Don't show success when there's an error
         }
         
-        // Add control bar for re-execution
+        // Add control bar with success status
+        const controlBarOptions: ControlBarOptions = {
+            showSuccess: showSuccess
+        };
+        
         this.uiRenderer.addControlBar(outputContainer.container, () => {
             this.processSimpleJSBlock(source, el, ctx);
-        });
+        }, controlBarOptions);
     }
 
     async updateSettings(newSettings: Partial<SimpleJSSettings>) {
