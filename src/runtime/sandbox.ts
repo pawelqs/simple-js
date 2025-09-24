@@ -168,37 +168,52 @@ export class SandboxExecutor {
     }
 
     private async executeInSandbox(code: string, context: SandboxContext): Promise<void> {
-        // Create a safer execution environment
-        const safeEval = new Function(
-            'readYaml',
-            'readTsv', 
-            'plot',
-            'table',
-            'console',
-            `
-            "use strict";
-            const window = undefined;
-            const global = undefined;
-            const process = undefined;
-            const require = undefined;
-            const module = undefined;
-            const exports = undefined;
-            const eval = undefined;
-            const Function = undefined;
-            
-            return (async function() {
-                ${code}
-            })();
-            `
-        );
+        try {
+            // Create a safer execution environment
+            const safeEval = new Function(
+                'readYaml',
+                'readTsv', 
+                'plot',
+                'table',
+                'console',
+                `
+                "use strict";
+                const window = undefined;
+                const global = undefined;
+                const process = undefined;
+                const require = undefined;
+                const module = undefined;
+                const exports = undefined;
+                const eval = undefined;
+                const Function = undefined;
+                
+                return (async function() {
+                    try {
+                        ${code}
+                    } catch (error) {
+                        console.error("Error in user code:", error);
+                        throw error;
+                    }
+                })();
+                `
+            );
 
-        await safeEval(
-            context.readYaml,
-            context.readTsv,
-            context.plot,
-            context.table,
-            context.console
-        );
+            const result = safeEval(
+                context.readYaml,
+                context.readTsv,
+                context.plot,
+                context.table,
+                context.console
+            );
+
+            // Handle both promise and non-promise returns
+            if (result && typeof result.then === 'function') {
+                await result;
+            }
+        } catch (error: any) {
+            console.error("Sandbox execution error:", error);
+            throw new Error(`Execution failed: ${error.message}`);
+        }
     }
 
     private resolvePath(path: string, currentFilePath?: string): string {

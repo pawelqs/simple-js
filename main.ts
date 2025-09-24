@@ -24,14 +24,21 @@ export default class SimpleJSPlugin extends Plugin {
         this.registerMarkdownCodeBlockProcessor(
             'simplejs',
             async (source, el, ctx) => {
+                console.log('[SimpleJS] Processing block:', source.substring(0, 50) + '...');
                 try {
                     await this.blockExecutor.processCodeBlock(source, el, ctx);
-                } catch (error) {
-                    console.error('SimpleJS block processing error:', error);
-                    el.createDiv({
-                        cls: 'simplejs-error',
-                        text: `Error processing SimpleJS block: ${error.message}`
-                    });
+                } catch (error: any) {
+                    console.error('[SimpleJS] Block processing error:', error);
+                    
+                    // Clear element and show error
+                    el.empty();
+                    const errorDiv = el.createDiv('simplejs-error');
+                    errorDiv.createEl('strong', { text: 'SimpleJS Error: ' });
+                    errorDiv.createSpan({ text: error.message || 'Unknown error occurred' });
+                    
+                    // Add debugging info
+                    const debugDiv = errorDiv.createDiv('simplejs-error-hint');
+                    debugDiv.setText(`💡 Check the browser console (F12) for more details. Plugin version: 1.0.0`);
                 }
             }
         );

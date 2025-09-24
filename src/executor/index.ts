@@ -106,12 +106,18 @@ export class BlockExecutor {
     }
 
     private showError(container: HTMLElement, message: string): void {
+        // Clear any existing content
+        container.empty();
+        
         const errorDiv = container.createDiv('simplejs-error');
         errorDiv.createEl('strong', { text: 'SimpleJS Error: ' });
         errorDiv.createSpan({ text: message });
         
+        // Log to console for debugging
+        console.error('[SimpleJS]', message);
+        
         // Add some basic troubleshooting hints
-        if (message.includes('file not found')) {
+        if (message.includes('file not found') || message.includes('not found')) {
             const hint = errorDiv.createDiv('simplejs-error-hint');
             hint.setText('💡 Check that the file path is correct and the file exists in your vault.');
         } else if (message.includes('timeout')) {
@@ -120,6 +126,12 @@ export class BlockExecutor {
         } else if (message.includes('YAML') || message.includes('TSV')) {
             const hint = errorDiv.createDiv('simplejs-error-hint');
             hint.setText('💡 Check the file format and syntax. See the plugin documentation for examples.');
+        } else if (message.includes('Plotly')) {
+            const hint = errorDiv.createDiv('simplejs-error-hint');
+            hint.setText('💡 There was an issue loading or using Plotly. Check your internet connection or try switching to bundle mode in settings.');
+        } else if (message.includes('Execution failed')) {
+            const hint = errorDiv.createDiv('simplejs-error-hint');
+            hint.setText('💡 Check the browser console (F12) for more detailed error information.');
         }
     }
 
