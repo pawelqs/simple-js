@@ -1,11 +1,9 @@
 {
 	"id": "simple-js",
-	"name": "Simple JS",
+	"name": "SimpleJS Plots",
 	"version": "1.0.0",
 	"minAppVersion": "0.15.0",
-	"description": "A plugin for creating plots in Obsidian.",
-	"author": "Obsidian",
-	"authorUrl": "https://obsidian.md",
-	"fundingUrl": "https://obsidian.md/pricing",
+	"description": "Execute JavaScript snippets and create interactive plots with Plotly. Read data from YAML and TSV files within your vault.",
+	"author": "SimpleJS Plugin",
 	"isDesktopOnly": false
 }
